@@ -1,6 +1,7 @@
 package main
 
 import (
+	"api/router"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -17,6 +18,8 @@ func main() {
 		Response.Health = "I am healthy!"
 		c.JSON(http.StatusOK, Response)
 	})
+
+	router.SetupRouter(app)
 
 	app.Run(":5000")
 
