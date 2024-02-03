@@ -17,36 +17,44 @@ const redirectURI = "http://localhost:5000/callback"
 var (
 	auth = spotifyauth.New(spotifyauth.WithRedirectURL(redirectURI),
 		spotifyauth.WithScopes(spotifyauth.ScopeUserReadPrivate),
-		spotifyauth.WithClientID(""),
-		spotifyauth.WithClientSecret(""))
+		spotifyauth.WithClientID("004a411911e54982b702e657f22c64b2"),
+		spotifyauth.WithClientSecret("a50ff8b0428d4cf88e093fd7b50b26c9"))
 	ch    = make(chan *spotify.Client)
-	state = "abc123"
+	state = "12345"
 )
 
 func main() {
 
+	// Gin Init with CORS Middleware
 	app := gin.Default()
-
 	app.Use(cors.Default())
 
+	app.GET("/authurl", getAuthURL)
 	app.GET("/callback", completeAuth)
 	app.GET("/music", getMusicData)
 
 	go func() {
-		app.Run(":5000")
+		client := <-ch
+
+		user, err := client.CurrentUser(context.Background())
+		if err != nil {
+			log.Println("Fatal at Client")
+			log.Fatal(err)
+		}
+		fmt.Println("You are logged in as:", user.ID)
 	}()
 
-	url := auth.AuthURL(state)
-	fmt.Println("Please log in to Spotify by visiting the following page in your browser:", url)
+	// Link for
+	// url := auth.AuthURL(state)
+	// fmt.Println("Please log in to Spotify by visiting the following page in your browser:", url)
 
-	client := <-ch
+	app.Run(":5000")
 
-	user, err := client.CurrentUser(context.Background())
-	if err != nil {
-		log.Println("Fatal at Client")
-		log.Fatal(err)
-	}
-	fmt.Println("You are logged in as:", user.ID)
+}
+
+func getAuthURL(c *gin.Context) {
+
+	c.JSON(http.StatusOK, gin.H{"response": auth.AuthURL(state)})
 
 }
 
@@ -64,12 +72,13 @@ func completeAuth(c *gin.Context) {
 	}
 
 	client := spotify.New(auth.Client(c, tok))
-	fmt.Fprintf(c.Writer, "Login Completed!")
+
+	c.Redirect(http.StatusMovedPermanently, "http://localhost:5173/access_granted")
 	ch <- client
 }
 
 func getMusicData(c *gin.Context) {
 
-	c.JSON(http.StatusOK, gin.H{"response": "hello"})
+	c.JSON(http.StatusOK, gin.H{"response": "music data"})
 
 }
