@@ -1,7 +1,6 @@
 package main
 
 import (
-	"api/router"
 	"context"
 	"fmt"
 	"log"
@@ -30,34 +29,18 @@ func main() {
 
 	app.Use(cors.Default())
 
-	router.SetupRouter(app)
-
-	app.GET("/callback", CompleteAuth)
+	app.GET("/callback", completeAuth)
+	app.GET("/music", getMusicData)
 
 	go func() {
 		app.Run(":5000")
 	}()
 
-	// first start an HTTP server
-	//
-	// http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-	// 	log.Println("Got request for:", r.URL.String())
-	// })
-	// go func() {
-	// 	err := http.ListenAndServe(":5000", nil)
-	// 	if err != nil {
-	// 		log.Println("Fatal at Server")
-	// 		log.Fatal(err)
-	// 	}
-	// }()
-
 	url := auth.AuthURL(state)
 	fmt.Println("Please log in to Spotify by visiting the following page in your browser:", url)
 
-	// wait for auth to complete
 	client := <-ch
 
-	// use the client to make calls that require authorization
 	user, err := client.CurrentUser(context.Background())
 	if err != nil {
 		log.Println("Fatal at Client")
@@ -67,7 +50,7 @@ func main() {
 
 }
 
-func CompleteAuth(c *gin.Context) {
+func completeAuth(c *gin.Context) {
 	tok, err := auth.Token(c, state, c.Request)
 	if err != nil {
 		log.Println("Fatal at Token")
@@ -80,8 +63,13 @@ func CompleteAuth(c *gin.Context) {
 		log.Fatalf("State mismatch: %s != %s\n", st, state)
 	}
 
-	// use the token to get an authenticated client
 	client := spotify.New(auth.Client(c, tok))
 	fmt.Fprintf(c.Writer, "Login Completed!")
 	ch <- client
+}
+
+func getMusicData(c *gin.Context) {
+
+	c.JSON(http.StatusOK, gin.H{"response": "hello"})
+
 }
