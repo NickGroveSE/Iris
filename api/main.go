@@ -1,11 +1,14 @@
 package main
 
 import (
+	"api/router"
 	"context"
 	"fmt"
 	"log"
 	"net/http"
 
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 	"github.com/zmb3/spotify/v2"
 	spotifyauth "github.com/zmb3/spotify/v2/auth"
 )
@@ -23,26 +26,30 @@ var (
 
 func main() {
 
-	// app := gin.Default()
+	app := gin.Default()
 
-	// app.Use(cors.Default())
+	app.Use(cors.Default())
 
-	// router.SetupRouter(app)
+	router.SetupRouter(app)
 
-	// app.Run(":5000")
+	app.GET("/callback", CompleteAuth)
+
+	go func() {
+		app.Run(":5000")
+	}()
 
 	// first start an HTTP server
-	http.HandleFunc("/callback", completeAuth)
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Got request for:", r.URL.String())
-	})
-	go func() {
-		err := http.ListenAndServe(":5000", nil)
-		if err != nil {
-			log.Println("Fatal at Server")
-			log.Fatal(err)
-		}
-	}()
+	//
+	// http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	// 	log.Println("Got request for:", r.URL.String())
+	// })
+	// go func() {
+	// 	err := http.ListenAndServe(":5000", nil)
+	// 	if err != nil {
+	// 		log.Println("Fatal at Server")
+	// 		log.Fatal(err)
+	// 	}
+	// }()
 
 	url := auth.AuthURL(state)
 	fmt.Println("Please log in to Spotify by visiting the following page in your browser:", url)
@@ -60,24 +67,21 @@ func main() {
 
 }
 
-func completeAuth(w http.ResponseWriter, r *http.Request) {
-	values := r.URL.Query()
-
-	fmt.Println(values.Get("code"))
-	tok, err := auth.Token(r.Context(), state, r)
+func CompleteAuth(c *gin.Context) {
+	tok, err := auth.Token(c, state, c.Request)
 	if err != nil {
 		log.Println("Fatal at Token")
-		http.Error(w, "Couldn't get token", http.StatusForbidden)
+		http.Error(c.Writer, "Couldn't get token", http.StatusForbidden)
 		log.Fatal(err)
 	}
-	if st := r.FormValue("state"); st != state {
+	if st := c.Request.FormValue("state"); st != state {
 		log.Println("Fatal at State")
-		http.NotFound(w, r)
+		http.NotFound(c.Writer, c.Request)
 		log.Fatalf("State mismatch: %s != %s\n", st, state)
 	}
 
 	// use the token to get an authenticated client
-	client := spotify.New(auth.Client(r.Context(), tok))
-	fmt.Fprintf(w, "Login Completed!")
+	client := spotify.New(auth.Client(c, tok))
+	fmt.Fprintf(c.Writer, "Login Completed!")
 	ch <- client
 }
