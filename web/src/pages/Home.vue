@@ -1,19 +1,17 @@
 <script lang="ts" setup>
 
 import axios from "axios";
-import { onMounted } from "vue";
+import { onMounted} from "vue";
 
 onMounted(async () => {
   const response = await axios
     .get(
-      "http://localhost:5000/authurl"
+      "http://localhost:5000/redirect"
     )
     .then((res) => res.data)
     .catch((err) => console.error(err))
 
-    
     window.location.href = response.response;
-    console.log(response.response);
 });
 
 </script>

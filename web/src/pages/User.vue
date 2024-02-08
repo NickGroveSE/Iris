@@ -1,6 +1,10 @@
 <script lang="ts" setup>
 
 import axios from "axios";
+// import { onMounted } from "vue";
+import { useRoute } from "vue-router"
+
+const { username }=useRoute().params
 
 
 const onClick = async () => {
@@ -17,6 +21,7 @@ const onClick = async () => {
 </script>
 
 <template>
+  <h1>{{ username }}</h1>
   <button @click="onClick">Click Me</button>
 </template>
 
