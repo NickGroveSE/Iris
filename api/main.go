@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -13,14 +15,17 @@ import (
 )
 
 const redirectURI = "http://localhost:5000/callback"
+const charsetForState = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+const lengthOfState = 16
 
 var (
 	auth = spotifyauth.New(spotifyauth.WithRedirectURL(redirectURI),
 		spotifyauth.WithScopes(spotifyauth.ScopeUserReadPrivate, spotifyauth.ScopeUserTopRead),
 		spotifyauth.WithClientID(""),
 		spotifyauth.WithClientSecret(""))
-	ch    = make(chan *spotify.Client)
-	state = "12345"
+	ch                    = make(chan *spotify.Client)
+	seededRand *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
+	state                 = randomString()
 )
 
 func main() {
@@ -97,4 +102,12 @@ func getMusicData(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"response": "music data"})
 
+}
+
+func randomString() string {
+	b := make([]byte, lengthOfState)
+	for i := range b {
+		b[i] = charsetForState[seededRand.Intn(len(charsetForState))]
+	}
+	return string(b)
 }
