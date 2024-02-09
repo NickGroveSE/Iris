@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 
 import axios from "axios";
-import { onMounted} from "vue";
+import { onMounted } from "vue";
 
 onMounted(async () => {
   const response = await axios

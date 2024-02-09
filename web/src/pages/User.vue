@@ -1,10 +1,11 @@
 <script lang="ts" setup>
 
 import axios from "axios";
-// import { onMounted } from "vue";
+import { ref } from "vue";
 import { useRoute } from "vue-router"
 
-const { username }=useRoute().params
+const user=ref(useRoute().params)
+const query = ref(useRoute().query)
 
 
 const onClick = async () => {
@@ -16,13 +17,15 @@ const onClick = async () => {
     .catch((err) => console.error(err));
 
     console.log(response);
+    console.log(query);
 };
 
 </script>
 
 <template>
-  <h1>{{ username }}</h1>
+  <h1>{{ user.username }}</h1>
   <button @click="onClick">Click Me</button>
+
 </template>
 
 <style scoped>

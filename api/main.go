@@ -45,10 +45,10 @@ func main() {
 			log.Fatal(err)
 		}
 
-		topTracks, err := client.CurrentUsersTopTracks(context.Background(), spotify.Timerange("long_term"))
+		// topTracks, err := client.CurrentUsersTopTracks(context.Background(), spotify.Timerange("long_term"))
 
 		fmt.Println("You are logged in as:", user.ID)
-		fmt.Println("Top Tracks: ", topTracks.Tracks)
+		// fmt.Println("Top Tracks: ", topTracks.Tracks)
 	}()
 
 	// Link for
@@ -85,7 +85,9 @@ func completeAuth(c *gin.Context) {
 		log.Fatal(err)
 	}
 
-	frontendURL := "http://localhost:5173/" + user.ID
+	values := c.Request.URL.Query()
+
+	frontendURL := "http://localhost:5173/" + user.ID + "?code=" + values.Get("code") + "&state=" + values.Get("state")
 
 	c.Redirect(http.StatusMovedPermanently, frontendURL)
 	ch <- client
