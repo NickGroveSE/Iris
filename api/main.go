@@ -26,12 +26,14 @@ var (
 	ch                    = make(chan *spotify.Client)
 	seededRand *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
 	state                 = randomString()
+	client     *spotify.Client
 )
 
 func main() {
 
 	// Gin Init with CORS Middleware
 	app := gin.Default()
+
 	app.Use(cors.Default())
 
 	app.ForwardedByClientIP = true
@@ -39,10 +41,18 @@ func main() {
 
 	app.GET("/redirect", getRedirectURL)
 	app.GET("/callback", completeAuth)
-	app.GET("/music", getMusicData)
+	app.GET("/music", func(c *gin.Context) {
+
+		topTracks, err := client.CurrentUsersTopTracks(context.Background(), spotify.Timerange("long_term"))
+		if err != nil {
+			log.Println("Fatal at Tracks")
+			log.Fatal(err)
+		}
+		c.JSON(http.StatusOK, gin.H{"data": topTracks.Tracks})
+	})
 
 	go func() {
-		client := <-ch
+		client = <-ch
 
 		user, err := client.CurrentUser(context.Background())
 		if err != nil {
@@ -83,25 +93,17 @@ func completeAuth(c *gin.Context) {
 		log.Fatalf("State mismatch: %s != %s\n", st, state)
 	}
 
-	client := spotify.New(auth.Client(c, tok))
-	user, err := client.CurrentUser(context.Background())
+	callbackClient := spotify.New(auth.Client(c, tok))
+	user, err := callbackClient.CurrentUser(context.Background())
 	if err != nil {
 		log.Println("Fatal at Client")
 		log.Fatal(err)
 	}
 
-	values := c.Request.URL.Query()
-
-	frontendURL := "http://localhost:5173/" + user.ID + "?code=" + values.Get("code") + "&state=" + values.Get("state")
+	frontendURL := "http://localhost:5173/" + user.ID
 
 	c.Redirect(http.StatusMovedPermanently, frontendURL)
-	ch <- client
-}
-
-func getMusicData(c *gin.Context) {
-
-	c.JSON(http.StatusOK, gin.H{"response": "music data"})
-
+	ch <- callbackClient
 }
 
 func randomString() string {

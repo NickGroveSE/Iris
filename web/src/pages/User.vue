@@ -4,8 +4,12 @@ import axios from "axios";
 import { ref } from "vue";
 import { useRoute } from "vue-router"
 
-const user=ref(useRoute().params)
-const query = ref(useRoute().query)
+const user = ref(useRoute().params)
+const code = ref(useRoute().query.code)
+const state = ref(useRoute().query.state)
+
+console.log(code)
+console.log(state)
 
 
 const onClick = async () => {
@@ -17,7 +21,6 @@ const onClick = async () => {
     .catch((err) => console.error(err));
 
     console.log(response);
-    console.log(query);
 };
 
 </script>
