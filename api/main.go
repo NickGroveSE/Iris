@@ -73,7 +73,7 @@ func main() {
 			})
 
 		}
-		// response, _ := json.Marshal(Connection{Tracks: tracks})
+
 		c.JSON(http.StatusOK, gin.H{"data": tracks})
 	})
 
@@ -101,8 +101,8 @@ func getRedirectURL(c *gin.Context) {
 
 	auth = spotifyauth.New(spotifyauth.WithRedirectURL(redirectURI),
 		spotifyauth.WithScopes(spotifyauth.ScopeUserReadPrivate, spotifyauth.ScopeUserTopRead),
-		spotifyauth.WithClientID("004a411911e54982b702e657f22c64b2"),
-		spotifyauth.WithClientSecret("a50ff8b0428d4cf88e093fd7b50b26c9"))
+		spotifyauth.WithClientID(""),
+		spotifyauth.WithClientSecret(""))
 
 	state = randomString()
 
