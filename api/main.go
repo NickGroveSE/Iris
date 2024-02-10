@@ -14,28 +14,37 @@ import (
 	spotifyauth "github.com/zmb3/spotify/v2/auth"
 )
 
-const redirectURI = "http://localhost:5000/callback"
-const charsetForState = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-const lengthOfState = 16
+const (
+	redirectURI     = "http://localhost:5000/callback"
+	charsetForState = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	lengthOfState   = 16
+)
 
 var (
-	auth = spotifyauth.New(spotifyauth.WithRedirectURL(redirectURI),
-		spotifyauth.WithScopes(spotifyauth.ScopeUserReadPrivate, spotifyauth.ScopeUserTopRead),
-		spotifyauth.WithClientID(""),
-		spotifyauth.WithClientSecret(""))
-	ch                    = make(chan *spotify.Client)
-	seededRand *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
-	state                 = randomString()
-	client     *spotify.Client
+	auth  *spotifyauth.Authenticator
+	ch    = make(chan *spotify.Client)
+	state string
 )
+
+type Track struct {
+	Name       string `json:"name"`
+	Artist     string `json:"artist"`
+	ImgURL     string `json:"imgurl"`
+	SpotifyURL string `json:"spotifyurl"`
+	// Glimpses   []string `json:"glimpses"`
+}
+
+type Connection struct {
+	Tracks []*Track `json:"tracks"`
+}
 
 func main() {
 
 	// Gin Init with CORS Middleware
 	app := gin.Default()
+	var client *spotify.Client
 
 	app.Use(cors.Default())
-
 	app.ForwardedByClientIP = true
 	app.SetTrustedProxies([]string{"127.0.0.1"})
 
@@ -43,12 +52,29 @@ func main() {
 	app.GET("/callback", completeAuth)
 	app.GET("/music", func(c *gin.Context) {
 
-		topTracks, err := client.CurrentUsersTopTracks(context.Background(), spotify.Timerange("long_term"))
+		var tracks []Track
+		var options []spotify.RequestOption
+		options = append(options, spotify.Timerange("short_term"))
+		options = append(options, spotify.Limit(10))
+
+		topTracks, err := client.CurrentUsersTopTracks(context.Background(), options...)
 		if err != nil {
 			log.Println("Fatal at Tracks")
 			log.Fatal(err)
 		}
-		c.JSON(http.StatusOK, gin.H{"data": topTracks.Tracks})
+
+		for _, track := range topTracks.Tracks {
+
+			tracks = append(tracks, Track{
+				Name:       track.Name,
+				Artist:     track.Artists[0].Name,
+				ImgURL:     track.Album.Images[0].URL,
+				SpotifyURL: track.ExternalURLs["spotify"],
+			})
+
+		}
+		// response, _ := json.Marshal(Connection{Tracks: tracks})
+		c.JSON(http.StatusOK, gin.H{"data": tracks})
 	})
 
 	go func() {
@@ -60,10 +86,7 @@ func main() {
 			log.Fatal(err)
 		}
 
-		// topTracks, err := client.CurrentUsersTopTracks(context.Background(), spotify.Timerange("long_term"))
-
 		fmt.Println("You are logged in as:", user.ID)
-		// fmt.Println("Top Tracks: ", topTracks.Tracks)
 	}()
 
 	// Link for
@@ -75,6 +98,13 @@ func main() {
 }
 
 func getRedirectURL(c *gin.Context) {
+
+	auth = spotifyauth.New(spotifyauth.WithRedirectURL(redirectURI),
+		spotifyauth.WithScopes(spotifyauth.ScopeUserReadPrivate, spotifyauth.ScopeUserTopRead),
+		spotifyauth.WithClientID("004a411911e54982b702e657f22c64b2"),
+		spotifyauth.WithClientSecret("a50ff8b0428d4cf88e093fd7b50b26c9"))
+
+	state = randomString()
 
 	c.JSON(http.StatusOK, gin.H{"response": auth.AuthURL(state)})
 
@@ -107,9 +137,15 @@ func completeAuth(c *gin.Context) {
 }
 
 func randomString() string {
+	var seededRand *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
+
 	b := make([]byte, lengthOfState)
 	for i := range b {
 		b[i] = charsetForState[seededRand.Intn(len(charsetForState))]
 	}
 	return string(b)
 }
+
+// func handleArtistNames() string {
+
+// }
