@@ -54,8 +54,12 @@ func main() {
 
 		var tracks []Track
 		var options []spotify.RequestOption
-		options = append(options, spotify.Timerange("short_term"))
+		var query = c.Request.URL.Query()
+
+		options = append(options, spotify.Timerange(spotify.Range(query["timerange"][0])))
 		options = append(options, spotify.Limit(10))
+
+		// fmt.Println(query["timerange"][0])
 
 		topTracks, err := client.CurrentUsersTopTracks(context.Background(), options...)
 		if err != nil {

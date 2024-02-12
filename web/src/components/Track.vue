@@ -3,8 +3,8 @@
     defineProps({
         name: String,
         artist: String,
-        imgurl: String,
-        colors: Object
+        imgurl: String
+        // colors: Object
     })
 
 </script>
@@ -41,7 +41,7 @@
     }
 
     .song-details {
-        width: 240px;
+        width: 350px;
         margin-left: 12px;
     }
 
@@ -59,7 +59,7 @@
 
 
     .colors-container {
-        width: 150px;
+        width: 100px;
         float: right;
     }
 

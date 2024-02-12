@@ -1,47 +1,62 @@
 <script lang="ts" setup>
 
 import axios from "axios";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, reactive } from "vue";
 import { useRoute } from "vue-router"
 import DefaultLayout from '../layout/Default.vue'
-import Iris from '../components/Iris.vue'
+// import Iris from '../components/Iris.vue'
 import Tracklist from '../components/Tracklist.vue'
 
 const user = ref(useRoute().params)
-const code = ref(useRoute().query.code)
-const state = ref(useRoute().query.state)
-
 console.log(user)
-console.log(code)
-console.log(state)
+
+let tracklistState = reactive({tracks: []})
 
 
 onMounted(async () => {
   const response = await axios
     .get(
-      "http://localhost:5000/music"
+      "http://localhost:5000/music", {
+        params: { timerange: "short_term"},
+      }
     )
     .then((res) => res.data)
     .catch((err) => console.error(err));
 
-    console.log(response);
+    tracklistState.tracks = response.data
+
 });
+
+const onClick = async (event) => {
+
+  const response = await axios
+    .get(
+      "http://localhost:5000/music", {
+        params: { timerange: event.target.id},
+      }
+    )
+    .then((res) => res.data)
+    .catch((err) => console.error(err));
+
+    tracklistState.tracks = response.data
+
+}
 
 </script>
 
 <template>
   <DefaultLayout>
     <div class="main-panel" id="left-panel">
-      <Iris :tracks="track"/>
+      <!-- <Iris :tracks="track"/> -->
       <div id="description">This is your Iris. An iridescent morphing collection of all the colors that make up the album artwork for your favorite music. Change the timeframe you want to pull from on the right.</div>
     </div>
     <div class="main-panel" id="right-panel">
       <ul id="timeframes">
-        <li class="timeframe"><a>1 Month</a></li>
-        <li class="timeframe"><a>6 Months</a></li>
-        <li class="timeframe" id="yearly"><a>All Time</a></li>
+        <li class="timeframe"><a @click="onClick($event)" id="short_term">1 Month</a></li>
+        <li class="timeframe"><a @click="onClick($event)" id="medium_term">6 Months</a></li>
+        <li class="timeframe"><a @click="onClick($event)" id="long_term">All Time</a></li>
       </ul>
-      <Tracklist id="tracklist" :tracks="tracks"/>
+      <Tracklist id="tracklist" :tracks="tracklistState.tracks"/>
     </div>
   </DefaultLayout>
 </template>
@@ -94,6 +109,12 @@ onMounted(async () => {
     font-weight: 600;
     font-size: 18px;
     text-align: center;
+  }
+
+  .timeframe:hover{
+    background-color: var(--primary-accent);
+    cursor: pointer;
+    transition: 0.5s;
   }
 
   a {
