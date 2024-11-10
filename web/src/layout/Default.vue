@@ -38,7 +38,7 @@
     }
 
     #app-name {
-        font-size: 24px;
+        font-size: 40px;
         font-style: italic;
         font-weight: 700;
     }
@@ -47,7 +47,7 @@
         width: 1000px;
         height: 1000px;
         background: url('../../public/iris.svg') no-repeat;
-        background-size: 60px 40px;
+        background-size: 72px 48px;
     }
 
     /* Main Styling */

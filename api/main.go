@@ -3,9 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
+	"image"
+	"image/color"
+	_ "image/jpeg"
 	"log"
 	"math/rand"
 	"net/http"
+	"sort"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -21,9 +25,10 @@ const (
 )
 
 var (
-	auth  *spotifyauth.Authenticator
-	ch    = make(chan *spotify.Client)
-	state string
+	auth   *spotifyauth.Authenticator
+	ch     = make(chan *spotify.Client)
+	state  string
+	client *spotify.Client
 )
 
 type Track struct {
@@ -42,7 +47,6 @@ func main() {
 
 	// Gin Init with CORS Middleware
 	app := gin.Default()
-	var client *spotify.Client
 
 	app.Use(cors.Default())
 	app.ForwardedByClientIP = true
@@ -76,22 +80,13 @@ func main() {
 				SpotifyURL: track.ExternalURLs["spotify"],
 			})
 
+			fmt.Println(track.Name)
+			getImage(track.Album.Images[0].URL)
+
 		}
 
 		c.JSON(http.StatusOK, gin.H{"data": tracks})
 	})
-
-	go func() {
-		client = <-ch
-
-		user, err := client.CurrentUser(context.Background())
-		if err != nil {
-			log.Println("Fatal at Client")
-			log.Fatal(err)
-		}
-
-		fmt.Println("You are logged in as:", user.ID)
-	}()
 
 	// Link for
 	// url := auth.AuthURL(state)
@@ -103,10 +98,12 @@ func main() {
 
 func getRedirectURL(c *gin.Context) {
 
+	go clientChannel()
+
 	auth = spotifyauth.New(spotifyauth.WithRedirectURL(redirectURI),
 		spotifyauth.WithScopes(spotifyauth.ScopeUserReadPrivate, spotifyauth.ScopeUserTopRead),
-		spotifyauth.WithClientID(""),
-		spotifyauth.WithClientSecret(""))
+		spotifyauth.WithClientID("004a411911e54982b702e657f22c64b2"),
+		spotifyauth.WithClientSecret("a50ff8b0428d4cf88e093fd7b50b26c9"))
 
 	state = randomString()
 
@@ -140,6 +137,20 @@ func completeAuth(c *gin.Context) {
 	ch <- callbackClient
 }
 
+func clientChannel() {
+
+	client = <-ch
+
+	user, err := client.CurrentUser(context.Background())
+	if err != nil {
+		log.Println("Fatal at Client")
+		log.Fatal(err)
+	}
+
+	fmt.Println("You are logged in as:", user.ID)
+
+}
+
 func randomString() string {
 	var seededRand *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
 
@@ -148,6 +159,72 @@ func randomString() string {
 		b[i] = charsetForState[seededRand.Intn(len(charsetForState))]
 	}
 	return string(b)
+}
+
+func getImage(path string) {
+
+	response, err := http.Get(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != 200 {
+		log.Fatal(err)
+	}
+
+	img, _, err := image.Decode(response.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	r := img.Bounds()
+
+	colorOccurrences := make(map[[3]uint8]int)
+
+	for y := 0; y < r.Max.Y; y++ {
+		for x := 0; x < r.Max.X; x++ {
+
+			pixel := img.At(x, y)
+			color := color.NRGBAModel.Convert(pixel).(color.NRGBA)
+
+			// Originally a lot of colors within the album covers would be various shades of similar colors so
+			// the results of the color analysis would not show this. These operations are to protect against that,
+			// grouping the occurrences of colors into a shade they are very similar to.
+			newR := color.R - (color.R % 15)
+			newG := color.G - (color.G % 15)
+			newB := color.B - (color.B % 15)
+			adjacentShade := [3]uint8{newR, newG, newB}
+
+			value, exists := colorOccurrences[adjacentShade]
+
+			if exists {
+				colorOccurrences[adjacentShade] = value + 1
+			} else {
+				colorOccurrences[adjacentShade] = 1
+			}
+
+		}
+	}
+
+	keys := make([][3]uint8, 0, len(colorOccurrences))
+
+	for key := range colorOccurrences {
+		keys = append(keys, key)
+	}
+
+	sort.SliceStable(keys, func(i, j int) bool {
+		return colorOccurrences[keys[i]] < colorOccurrences[keys[j]]
+	})
+
+	fmt.Println("Top Colors")
+	fmt.Println(keys[len(keys)-1])
+	fmt.Println(keys[len(keys)-2])
+	fmt.Println(keys[len(keys)-3])
+	fmt.Println(keys[len(keys)-4])
+	fmt.Println(keys[len(keys)-5])
+	fmt.Println()
+
 }
 
 // func handleArtistNames() string {

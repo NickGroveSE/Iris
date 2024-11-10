@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 
 import axios from "axios";
-import { onMounted, ref, reactive } from "vue";
+import { onMounted, ref, reactive } from 'vue';
 import { useRoute } from "vue-router"
 import DefaultLayout from '../layout/Default.vue'
 // import Iris from '../components/Iris.vue'
@@ -10,7 +10,9 @@ import Tracklist from '../components/Tracklist.vue'
 const user = ref(useRoute().params)
 console.log(user)
 
-let tracklistState = reactive({tracks: []})
+let tracklistState = reactive({
+  tracks: []
+})
 
 
 onMounted(async () => {
@@ -40,6 +42,8 @@ const onClick = async (event) => {
 
     tracklistState.tracks = response.data
 
+    console.log(response.data)
+
 }
 
 </script>
@@ -48,13 +52,13 @@ const onClick = async (event) => {
   <DefaultLayout>
     <div class="main-panel" id="left-panel">
       <!-- <Iris :tracks="track"/> -->
-      <div id="description">This is your Iris. An iridescent morphing collection of all the colors that make up the album artwork for your favorite music. Change the timeframe you want to pull from on the right.</div>
+      <div id="description">This is your Iris. An iridescent morphing collection of all the colors that make up the album artwork for your favorite music. Change the timeframe to when you want to pull from on the right.</div>
     </div>
     <div class="main-panel" id="right-panel">
       <ul id="timeframes">
         <li class="timeframe"><a @click="onClick($event)" id="short_term">1 Month</a></li>
         <li class="timeframe"><a @click="onClick($event)" id="medium_term">6 Months</a></li>
-        <li class="timeframe"><a @click="onClick($event)" id="long_term">All Time</a></li>
+        <li class="timeframe"><a @click="onClick($event)" id="long_term">1 Year</a></li>
       </ul>
       <Tracklist id="tracklist" :tracks="tracklistState.tracks"/>
     </div>
@@ -82,7 +86,7 @@ const onClick = async (event) => {
 
   /* Intra-Panel Styling*/
   #description {
-    width: 400px;
+    width: 600px;
     height: 80px;
     position: absolute;
     left: 0;
@@ -90,15 +94,14 @@ const onClick = async (event) => {
     bottom: 50px;
     margin: 0 auto 0 auto;
     padding: 5px;
-    font-size: 14px;
+    font-size: 20px;
     text-align: center;
   }
 
   #timeframes {
-    height: 30px;
-    width: 390px;
-    margin: 20px auto 0 auto;
-    padding: 0%;
+    width: 500px;
+    margin: 0 auto 20px auto;
+    
     list-style: none;
   }
 
@@ -107,8 +110,9 @@ const onClick = async (event) => {
     line-height: 30px;
     display: inline-block;
     font-weight: 600;
-    font-size: 18px;
+    font-size: 28px;
     text-align: center;
+    padding: 10px 10px;
   }
 
   .timeframe:hover{

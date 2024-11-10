@@ -31,13 +31,13 @@
 <style scoped>
 
     .song-element {
-        height: 30px;
+        height: 60px;
         display: inline-block;
         vertical-align: top;
     }
 
     .album-art {
-        width: 30px;
+        width: 60px;
     }
 
     .song-details {
@@ -46,13 +46,13 @@
     }
 
     .name {
-        font-size: 11px;
+        font-size: 20px;
         font-weight: 500;
         color: var(--text);
     }
 
     .artist {
-        font-size: 10px;
+        font-size: 15px;
         font-weight: 500;
         color: var(--primary-accent);
     }
