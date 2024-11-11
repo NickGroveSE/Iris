@@ -175,3 +175,31 @@
     color: white;
     font-family: 'Kanit';
   }
+
+  @for $i from 1 through 10 {
+    @for $j from 1 through 5 {
+      $rand: random($limit: 45) + 45;
+      @if $j % 2 != 0 {
+        .song:nth-child(#{$i}) .glimpse:nth-child(#{$j}) {
+          animation: downwards ($rand) + s ease infinite;
+        }
+      } @else {
+        .song:nth-child(#{$i}) .glimpse:nth-child(#{$j}) {
+          animation: upwards ($rand) + s ease infinite;
+        }
+      }
+  
+    }
+  }
+  
+  @keyframes downwards {
+    0% { transform: translateY(-50%); }
+    50% { transform: translateY(50%); } 
+    100% { transform: translateY(-50%); }
+  }
+  
+  @keyframes upwards {
+    0% { transform: translateY(50%); }
+    50% { transform: translateY(-50%); } 
+    100% { transform: translateY(50%); }
+  }

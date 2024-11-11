@@ -32,11 +32,11 @@ var (
 )
 
 type Track struct {
-	Name       string `json:"name"`
-	Artist     string `json:"artist"`
-	ImgURL     string `json:"imgurl"`
-	SpotifyURL string `json:"spotifyurl"`
-	// Glimpses   []string `json:"glimpses"`
+	Name       string      `json:"name"`
+	Artist     string      `json:"artist"`
+	ImgURL     string      `json:"imgurl"`
+	SpotifyURL string      `json:"spotifyurl"`
+	Glimpses   [5][3]uint8 `json:"glimpses"`
 }
 
 type Connection struct {
@@ -78,10 +78,8 @@ func main() {
 				Artist:     track.Artists[0].Name,
 				ImgURL:     track.Album.Images[0].URL,
 				SpotifyURL: track.ExternalURLs["spotify"],
+				Glimpses:   getImageColors(track.Album.Images[0].URL),
 			})
-
-			fmt.Println(track.Name)
-			getImage(track.Album.Images[0].URL)
 
 		}
 
@@ -161,7 +159,7 @@ func randomString() string {
 	return string(b)
 }
 
-func getImage(path string) {
+func getImageColors(path string) [5][3]uint8 {
 
 	response, err := http.Get(path)
 	if err != nil {
@@ -217,13 +215,21 @@ func getImage(path string) {
 		return colorOccurrences[keys[i]] < colorOccurrences[keys[j]]
 	})
 
-	fmt.Println("Top Colors")
-	fmt.Println(keys[len(keys)-1])
-	fmt.Println(keys[len(keys)-2])
-	fmt.Println(keys[len(keys)-3])
-	fmt.Println(keys[len(keys)-4])
-	fmt.Println(keys[len(keys)-5])
-	fmt.Println()
+	return [5][3]uint8{
+		keys[len(keys)-1],
+		keys[len(keys)-2],
+		keys[len(keys)-3],
+		keys[len(keys)-4],
+		keys[len(keys)-5],
+	}
+
+	// fmt.Println("Top Colors")
+	// fmt.Println(keys[len(keys)-1])
+	// fmt.Println(keys[len(keys)-2])
+	// fmt.Println(keys[len(keys)-3])
+	// fmt.Println(keys[len(keys)-4])
+	// fmt.Println(keys[len(keys)-5])
+	// fmt.Println()
 
 }
 

@@ -15,11 +15,11 @@
         <slot/>
     </main>
 
-    <!-- <footer>
+    <footer>
         <a class="footer-element" href="https://nickgrove.netlify.app/">My Portfolio Site</a>
         <a class="footer-element" href="https://github.com/NickGroveSE">Github</a>
         <a class="footer-element" >Buy Me a Coffee :)</a>
-    </footer> -->
+    </footer>
 
 </template>
 
@@ -57,7 +57,7 @@
     }
 
     /* Footer Styling */
-    /* footer {
+    footer {
         height: 60px;
         width: 100%;
         margin: auto 0;
@@ -71,6 +71,6 @@
         display: inline-block;
         color: var(--text);
         
-    } */
+    }
 
 </style>

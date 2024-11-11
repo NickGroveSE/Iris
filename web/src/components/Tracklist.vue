@@ -17,7 +17,7 @@
             :name="track.name"
             :artist="track.artist"
             :imgurl="track.imgurl"
-            :colors="track.colors"
+            :glimpses="track.glimpses"
         />
     </div>
 
@@ -27,7 +27,8 @@
 
     .track {
         padding: 5px 0 5px 0;
-        width: 100%;
+        margin: 0 auto;
+        width: 90%;
         border-bottom: 1px solid var(--primary-accent);
     }
 

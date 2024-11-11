@@ -3,8 +3,8 @@
     defineProps({
         name: String,
         artist: String,
-        imgurl: String
-        // colors: Object
+        imgurl: String,
+        glimpses: Object
     })
 
 </script>
@@ -17,13 +17,13 @@
             <div class="name">{{ name }}</div>
             <div class="artist">{{ artist }}</div>
         </div>
-        <a class="song-element colors-container" href="https://coolors.co/">
-            <div 
+        <div class="song-element colors-container">
+            <!-- <div 
                 class="color"
-                v-for="color in colors"
-                :style="`background-color: #${color}`"
-            ></div>
-        </a>
+                v-for="color in glimpses"
+                :style="`background-color: rgba(${color[0]},${color[1]},${color[2]}, 1)`"
+            ></div> -->
+        </div>
     </div>
 
 </template>
@@ -41,7 +41,7 @@
     }
 
     .song-details {
-        width: 350px;
+        width: 450px;
         margin-left: 12px;
     }
 
@@ -65,7 +65,7 @@
 
     .color {
         width: 20px;
-        height: 30px;
+        height: 100%;
         float: right;
         vertical-align: top;
     }

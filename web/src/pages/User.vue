@@ -4,14 +4,15 @@ import axios from "axios";
 import { onMounted, ref, reactive } from 'vue';
 import { useRoute } from "vue-router"
 import DefaultLayout from '../layout/Default.vue'
-// import Iris from '../components/Iris.vue'
+import Iris from '../components/Iris.vue'
 import Tracklist from '../components/Tracklist.vue'
 
 const user = ref(useRoute().params)
 console.log(user)
 
 let tracklistState = reactive({
-  tracks: []
+  tracks: [],
+  selectedTimeframe: "short_term"
 })
 
 
@@ -30,6 +31,9 @@ onMounted(async () => {
 });
 
 const onClick = async (event) => {
+
+  tracklistState.selectedTimeframe = event.target.id
+  tracklistState.tracks = []
 
   const response = await axios
     .get(
@@ -51,14 +55,23 @@ const onClick = async (event) => {
 <template>
   <DefaultLayout>
     <div class="main-panel" id="left-panel">
-      <!-- <Iris :tracks="track"/> -->
+      <Iris v-if="tracklistState.tracks.length != 0" :tracks="tracklistState.tracks"/>
       <div id="description">This is your Iris. An iridescent morphing collection of all the colors that make up the album artwork for your favorite music. Change the timeframe to when you want to pull from on the right.</div>
     </div>
     <div class="main-panel" id="right-panel">
       <ul id="timeframes">
-        <li class="timeframe"><a @click="onClick($event)" id="short_term">1 Month</a></li>
-        <li class="timeframe"><a @click="onClick($event)" id="medium_term">6 Months</a></li>
-        <li class="timeframe"><a @click="onClick($event)" id="long_term">1 Year</a></li>
+        <li class="timeframe" 
+          :style="tracklistState.selectedTimeframe == 'short_term' ? 'border-bottom: 2px solid var(--primary-accent); color: var(--primary-accent);' : 'color: white'">
+          <a @click="onClick($event)" id="short_term" >1 Month</a>
+        </li>
+        <li class="timeframe" 
+          :style="tracklistState.selectedTimeframe == 'medium_term' ? 'border-bottom: 2px solid var(--primary-accent); color: var(--primary-accent);' : 'color: white'">
+          <a @click="onClick($event)" id="medium_term">6 Months</a>
+        </li>
+        <li class="timeframe"
+          :style="tracklistState.selectedTimeframe == 'long_term' ? 'border-bottom: 2px solid var(--primary-accent); color: var(--primary-accent);' : 'color: white'">
+          <a @click="onClick($event)" id="long_term">1 Year</a>
+        </li>
       </ul>
       <Tracklist id="tracklist" :tracks="tracklistState.tracks"/>
     </div>
@@ -75,13 +88,13 @@ const onClick = async (event) => {
   }
 
   #left-panel {
-    width: calc(50% - 100px);
-    margin-left: 100px;
+    width: calc(50% - 150px);
+    margin-left: 150px;
   }
 
   #right-panel {
-    width: calc(50% - 100px);
-    margin-right: 100px;
+    width: calc(50% - 150px);
+    margin-right: 150px;
   }
 
   /* Intra-Panel Styling*/
@@ -106,13 +119,14 @@ const onClick = async (event) => {
   }
 
   .timeframe {
-    width: 130px;
+    width: 120px;
     line-height: 30px;
     display: inline-block;
     font-weight: 600;
     font-size: 28px;
     text-align: center;
     padding: 10px 10px;
+    margin: 0 10px;
   }
 
   .timeframe:hover{
@@ -123,12 +137,6 @@ const onClick = async (event) => {
 
   a {
     text-decoration: none;
-  }
-
-  #yearly {
-    border-bottom: 2px solid var(--primary-accent);
-    color: var(--primary-accent);
-    /* box-shadow: 0px 2px var(--text-accent); */
   }
 
   /* #tracklist {
