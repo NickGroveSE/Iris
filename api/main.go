@@ -132,7 +132,9 @@ func completeAuth(c *gin.Context) {
 		log.Fatal(err)
 	}
 
-	frontendURL := "https://f219-2603-6010-5303-4994-fd4a-d2f8-c0ae-7b30.ngrok-free.app/" + user.ID
+	// TO DO: Check Env Var
+
+	frontendURL := "https://irisweb-7mot0kxud-nick-groves-projects.vercel.app/" + user.ID
 
 	c.Redirect(http.StatusMovedPermanently, frontendURL)
 	ch <- callbackClient
