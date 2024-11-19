@@ -4,7 +4,7 @@ import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 
 const routes: RouteRecordRaw[] = [
   { path: "/", component: Home },
-  { path: "/user", component: User },
+  { path: "/:username", component: User },
 ];
 
 const router = createRouter({
