@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	redirectURI     = "http://localhost:5000/callback"
+	redirectURI     = "https://iris-530665662396.us-central1.run.app/callback"
 	charsetForState = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	lengthOfState   = 16
 )
@@ -134,7 +134,7 @@ func completeAuth(c *gin.Context) {
 
 	// TO DO: Check Env Var
 
-	frontendURL := "https://irisweb-7mot0kxud-nick-groves-projects.vercel.app/" + user.ID
+	frontendURL := "https://irisweb.vercel.app/" + user.ID
 
 	c.Redirect(http.StatusMovedPermanently, frontendURL)
 	ch <- callbackClient
