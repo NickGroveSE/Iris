@@ -54,6 +54,9 @@ func main() {
 
 	app.GET("/redirect", getRedirectURL)
 	app.GET("/callback", completeAuth)
+	app.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"data": "healthy"})
+	})
 	app.GET("/music", func(c *gin.Context) {
 
 		var tracks []Track
