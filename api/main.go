@@ -113,7 +113,7 @@ func getRedirectURL(c *gin.Context) {
 }
 
 func completeAuth(c *gin.Context) {
-	tok, err := auth.Token(c, state, c.Request)
+	tok, err := auth.Token(c.Request.Context(), state, c.Request)
 	if err != nil {
 		log.Println("Fatal at Token")
 		http.Error(c.Writer, "Couldn't get token", http.StatusForbidden)
