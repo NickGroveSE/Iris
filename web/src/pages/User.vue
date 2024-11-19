@@ -19,7 +19,7 @@ let tracklistState = reactive({
 onMounted(async () => {
   const response = await axios
     .get(
-      "http://localhost:5000/music", {
+      "https://localhost:5000/music", {
         params: { timerange: "short_term"},
       }
     )

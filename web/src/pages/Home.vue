@@ -6,7 +6,7 @@ import { onMounted } from "vue";
 onMounted(async () => {
   const response = await axios
     .get(
-      "http://localhost:5000/redirect"
+      process.env.BACKEND_URL || "https://localhost:5000/redirect"
     )
     .then((res) => res.data)
     .catch((err) => console.error(err))
