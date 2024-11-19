@@ -19,7 +19,7 @@ let tracklistState = reactive({
 onMounted(async () => {
   const response = await axios
     .get(
-      (process.env.BACKEND_URL || "https://localhost:5000") + "/music", {
+      (import.meta.env.VITE_BACKEND_URL || "https://localhost:5000") + "/music", {
         params: { timerange: "short_term"},
       }
     )
@@ -37,7 +37,7 @@ const onClick = async (event) => {
 
   const response = await axios
     .get(
-      (process.env.BACKEND_URL || "https://localhost:5000") + "/music", {
+      (import.meta.env.VITE_BACKEND_URL || "https://localhost:5000") + "/music", {
         params: { timerange: event.target.id},
       }
     )
